@@ -1,0 +1,180 @@
+{% extends 'base.html' %}
+{% block title %}主页{% endblock %}
+{% block content %}
+    {% if request.session.is_login %}
+    <head>
+    <title>订票页面</title>
+        <!-- meta -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <!-- css -->
+    <link rel="stylesheet" href="https://cdn.bootcss.com/bootstrap/3.3.7/css/bootstrap.min.css">
+
+    <!-- js -->
+    <script src="https://cdn.bootcss.com/jquery/3.2.1/jquery.min.js"></script>
+    <script src="https://cdn.bootcss.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+
+    </head>
+
+    <body background="D:\django_projects\booking_system\mysite_login\\templates\photo.jpg" style="background-repeat:no-repeat;background-size:100% 100%;background-attachment:fixed;">
+
+    <div class="container">
+        <div class="jumbotron">
+            <h1 style="text-align: center">中国铁路 60321</h1>
+            <p style="text-align: center">简易的铁路车票管理系统，制作者：Derek</p>
+            <h4 style="text-align: center">当前模式：用户</h4>
+        </div>
+
+        <h2 style="text-align: center">当前车票信息</h2>
+
+        <table class="table table-bordered">
+            <thead>
+            <tr>
+                <th>车次</th>
+                <th>出发站-到达站</th>
+                <th>出发时间</th>
+                <th>剩余座位</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for train in trains %}
+            <tr>
+                <td>{{ train.num }}</td>
+                <td>{{ train.name }}</td>
+                <td>{{ train.time }}</td>
+                <td>{{ train.seats }}</td>
+            </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+
+        <br>
+        <h2 style="text-align: center">输入实名进行购票</h2>
+
+        <form action="{% url 'booking' %}" method="post" >
+              {% csrf_token %}
+            <div class="form-group">
+                <div class="col-xs-2">
+                    <label for="train_num">车次</label>
+                    {{ ticket_form.train_num }}
+    {#                <input class="form-control">#}
+                    {% for error in ticket_form.train_num.errors %}
+                         <h6 style="color: red"><strong>{{ error|escape }}</strong></h6>
+                    {% endfor %}
+                </div>
+                <div class="col-xs-2">
+                    <label for="name">用户姓名</label>
+                    {{ ticket_form.name }}
+    {#                <input class="form-control">#}
+                    {% for error in ticket_form.name.errors %}
+                         <h6 style="color: red"><strong>{{ error|escape }}</strong></h6>
+                    {% endfor %}
+                </div>
+                <div class="col-xs-2">
+                    <br>
+                    <button type="submit" name="booking" class="btn btn-default">购买</button>
+                    <h6 style="color: red"><strong>{{ booking_message }}</strong></h6>
+                </div>
+            </div>
+        </form>
+
+        <br><br><br><br>
+        <h2 style="text-align: center">预订信息查询</h2>
+        <h5 style="text-align: center">查询结果在下方列表栏中</h5>
+
+        <form action="{% url 'query' %}" method="post" >
+              {% csrf_token %}
+            <div class="form-group">
+                <div class="col-xs-2">
+                    <label for="name">姓名</label>
+                     {{ person_form.name }}
+                     {% for error in person_form.name.errors %}
+                         <h6 style="color: red"><strong>{{ error|escape }}</strong></h6>
+                     {% endfor %}
+    {#                 {{ person_form.name.errors|escape  }}#}
+                </div>
+                <div class="col-xs-2">
+                    <br>
+                    <button type="submit" name="submit" value="find" class="btn btn-default">查询</button>
+                </div>
+                <div class="col-xs-2">
+                    <br>
+                    <h6 style="color: red">{{ query_message }}{{ cancel_message }}</h6>
+                </div>
+            </div>
+        </form>
+
+        <br><br><br><br>
+        <table class="table table-bordered">
+            <thead>
+            <tr>
+                <th>乘客姓名</th>
+                <th>车次</th>
+                <th>出发站-到达站</th>
+                <th>出发时间</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% if show %}
+            {% for ticket in tickets %}
+            <tr>
+                <td>{{ ticket.name }}</td>
+                <td>{{ ticket.train.num }}</td>
+                <td>{{ ticket.train.name }}</td>
+                <td>{{ ticket.train.time }}</td>
+            </tr>
+            {% empty %}
+             <tr>
+                <td>暂无乘车人</td>
+                <td>None</td>
+                <td>None</td>
+                <td>None</td>
+             </tr>
+            {% endfor %}
+            {% endif %}
+            </tbody>
+        </table>
+
+        {% if show %}
+        <form action="{% url 'query'  %}" method="post" >
+              {% csrf_token %}
+            <div class="form-group">
+                <div class="col-xs-4">
+                    <h5>您可以取消订单。若要取消，请填写您要取消的车次。</h5>
+                </div>
+                <div class="col-xs-2">
+                    {{ num_form.num }}
+                    {% for error in num_form.num.errors %}
+                        <h6 style="color: red"><strong>{{ error|escape }}</strong></h6>
+                    {% endfor %}
+    {#                  {{ num_form.num.errors|escape }}#}
+                </div>
+                <div class="col-xs-1">
+                    <button type="submit" name="submit" value="yes" class="btn btn-default">确定取消</button>
+                </div>
+                <div class="col-xs-1">
+                    <button type="submit" name="submit" value="no" class="btn btn-default">放弃操作</button>
+                </div>
+                <div class="col-xs-2">
+                    <h6 style="color: red">{{ cancel_message }}</h6>
+                </div>
+            </div>
+        </form>
+        <br><br><br><br>
+        {% endif %}
+
+    </div>
+
+    </body>
+
+    </html>
+
+    {% else %}
+
+    <h1>购票/管理车次请登录！</h1>
+
+    {% endif %}
+
+{% endblock %}
+
